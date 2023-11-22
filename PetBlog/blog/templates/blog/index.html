@@ -1,0 +1,39 @@
+{%extends 'base.html'%}
+{%block TITLE%}
+Home Page
+{%endblock%}
+
+{%block CONTENT%}
+<div class="container">
+    <div class="row">
+        {%for post in posts%}
+        <div class="col md-5 mt-5">
+            <div class="card text-center">
+                <div class="card-header">
+                    Категория:
+                    <a href="{{post.category.get_absolute_url}}">{{post.category}}</a>
+                    <br>
+                    Теги:
+                    {%for tag in post.tags.all%}
+                    <a href="{{tag.get_absolute_url}}">{{tag.title}}</a>
+                    {%endfor%}
+
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{post.title}}</h5>
+                    <p class="card-text">{{post.content|safe|linebreaks|truncatewords:20}}</p>
+                    <a href="{{post.get_absolute_url}}" class="btn btn-primary">Подробнее</a>
+                </div>
+                <div class="card-footer text-body-secondary">
+                    Просмотры: {{post.views}} | Лайки {{post.likes}}
+                </div>
+                <div class="card-footer text-body-secondary">
+                    Опубликовано: {{post.created_at}}
+                </div>
+            </div>
+        </div>
+        {%endfor%}
+    </div>
+</div>
+
+{%endblock%}
