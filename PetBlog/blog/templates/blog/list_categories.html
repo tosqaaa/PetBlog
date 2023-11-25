@@ -1,0 +1,16 @@
+<h4 class="mb-3 text-center">Категории:</h4>
+
+<div class="list-group">
+    {%if is_home_page%}
+    <a href="{%url 'home'%}" class="list-group-item list-group-item-action active" aria-current="true">Все</a>
+    {%else%}
+    <a href="{%url 'home'%}" class="list-group-item list-group-item-action ">Все</a>
+    {%endif%}
+    {%for category in categories%}
+    {%if category.slug == category_selected_slug%}
+    <a href="{{category.get_absolute_url}}" class="list-group-item list-group-item-action active" aria-current="true">{{category.title}}</a>
+    {%else%}
+    <a href="{{category.get_absolute_url}}" class="list-group-item list-group-item-action ">{{category.title}}</a>
+    {%endif%}
+    {%endfor%}
+</div>

@@ -1,0 +1,18 @@
+{%extends 'base.html'%}
+
+{%block TITLE%}
+{{title}} - {{block.super}}
+{%endblock%}
+
+{%block CONTENT%}
+<div class="col-lg-6">
+    <h1>Регистрация</h1>
+    <form action="{%url 'register'%}" method="post">
+        {%csrf_token%}
+        {{form.as_p}}
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+    </form>
+    <br>
+    <p>Уже есть аккаунт? <a class="link-primary link-underline-opacity-0" href="{%url 'login'%}">Вход</a></p>
+</div>
+{%endblock%}

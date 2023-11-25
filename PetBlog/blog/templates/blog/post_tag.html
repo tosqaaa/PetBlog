@@ -6,15 +6,20 @@
 
 {%block CATEGORIES%}
 
+{{category_selected_slug}}
 {%show_categories category_selected_slug%}
 {%endblock%}
 
 
 {%block CONTENT%}
 <h4 class="mb-3">Количество постов: {{posts_count}}</h4>
+
 {%for post in posts%}
 <div class="card text-center mb-5">
     <div class="card-header">
+        Категория:
+        <a href="{{post.category.get_absolute_url}}">{{post.category}}</a>
+        <br>
         Теги:
         {%for tag in post.tags.all%}
         <a href="{{tag.get_absolute_url}}">{{tag.title}}</a> |
@@ -43,6 +48,7 @@
         Опубликовано: {{post.created_at}}
     </div>
 </div>
+
 {%endfor%}
 {%endblock%}
 
@@ -54,4 +60,3 @@
 {%block PAGINATION%}
 {%include 'inc/_pagination.html' with page_obj=page_obj%}
 {%endblock%}
-

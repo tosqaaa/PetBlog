@@ -1,0 +1,5 @@
+<h3 class="mb-3 text-center">Облако тегов:</h3>
+
+{%for tag in tags%}
+<a class="btn btn-primary m-1" href="{{tag.get_absolute_url}}" role="button">{{tag.title}}</a>
+{%endfor%}
