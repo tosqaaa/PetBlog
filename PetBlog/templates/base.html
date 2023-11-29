@@ -24,7 +24,8 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             </ul>
             {%if user.is_authenticated%}
-            <span class="navbar-brand">{{user.username}}</span>
+            <a class="navbar-brand" href="{%url 'create_post'%}">Написать пост</a>
+            <a class="navbar-brand" href="{%url 'profile' username=user.username%}">{{user.username}}</a>
             <span class="navbar-brand">||</span>
             <a class="navbar-brand" href="{%url 'logout'%}">Выход</a>
             {%else%}

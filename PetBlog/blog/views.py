@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, FormView
 
-from .forms import UserLoginForm, UserRegisterForm
-from .models import Post, Comment, Category, Tag
+from .forms import UserLoginForm, UserRegisterForm, ProfileForm, CreatePostForm
+from .models import Post, Comment, Category, Tag, Profile
 
 
 class PostHome(ListView):
@@ -27,12 +28,25 @@ class PostDetail(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
     context_object_name = 'post'
+    slug_field = 'slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Пост'
+        return context
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset=queryset)
+        obj.views += 1
+        obj.save()
+        return obj
 
 
 class CommentDetail(DetailView):
     model = Comment
     context_object_name = 'comment'
     template_name = 'blog/comment_detail.html'
+    slug_field = 'slug'
 
 
 class PostCategory(ListView):
@@ -111,3 +125,71 @@ def user_register(request):
         'form': form
     }
     return render(request, template_name='blog/register.html', context=context)
+
+
+def edit_profile(request):
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        print(form)
+        if form.is_valid():
+            form.save()
+            messages.success(request, message="Профиль успешно отредактирован")
+            return redirect('home')
+        else:
+            messages.error(request, message="Ошибка редактирования профиля")
+    else:
+        form = ProfileForm()
+
+    context = {
+        'title': 'Редактирование профиля',
+        'form': form
+    }
+    return render(request, template_name='blog/edit_profile.html', context=context)
+
+
+class UserProfile(DetailView):
+    model = Profile
+    context_object_name = 'profile'
+    template_name = 'blog/user_profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Профиль'
+        context['user_posts'] = self.object.get_user_posts()
+        return context
+
+    def get_object(self, queryset=None):
+        username = self.kwargs['username']
+        user = User.objects.get(username=username)
+        profile = Profile.objects.get(user=user)
+        return profile
+
+
+class CreatePost(FormView):
+    form_class = CreatePostForm
+    template_name = 'blog/create_post.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Создание поста'
+        return context
+
+
+def create_post(request):
+    if request.method == 'POST':
+        form = CreatePostForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.author = request.user
+            obj.save()
+            messages.success(request, message='Пост успешно создан')
+            return redirect('home')
+
+        else:
+            messages.error(request, message='Ошибка создания поста')
+    form = CreatePostForm()
+    context = {
+        'title': 'Создание поста',
+        'form': form
+    }
+    return render(request, template_name='blog/create_post.html', context=context)

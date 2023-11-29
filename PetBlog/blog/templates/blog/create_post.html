@@ -1,0 +1,16 @@
+{%extends 'base.html'%}
+{%load blog_tags%}
+{%block TITLE%}
+{{title}}
+{%endblock%}
+
+{%block CONTENT%}
+<h4>Создание поста</h4>
+
+<form action="{%url 'create_post'%}" method="post" enctype="multipart/form-data">
+    {%csrf_token%}
+    {{form.media}}
+    {{form.as_p}}
+    <button type="submit" class="btn btn-primary mt-1">Сохранить</button>
+</form>
+{%endblock%}

@@ -1,0 +1,23 @@
+{%extends 'base.html'%}
+{%load blog_tags%}
+{%block TITLE%}
+{{title}}
+{%endblock%}
+
+{%block CONTENT%}
+<h4>Редактирование профиля <b>{{user.username}}</b></h4>
+<p>Текущий аватар </p>
+{%if user.profile.avatar%}
+<img src="{{user.profile.avatar.url}}" class="img-thumbnail mb-5" alt="avatar" width="300">
+{%else%}
+<img src="/static/photos/no_image.jpg" class="img-thumbnail" alt="no-avatar" width="300">
+{%endif%}
+<p>Текущее 'О себе'</p>
+<p class="mt-1">{{user.profile.about_me|safe}}</p>
+<form action="{%url 'edit_profile'%}" method="post" enctype="multipart/form-data">
+    {%csrf_token%}
+    {{form.media}}
+    {{form.as_p}}
+    <button type="submit" class="btn btn-primary mt-1">Сохранить</button>
+</form>
+{%endblock%}

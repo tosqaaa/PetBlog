@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
 
 
 class Category(models.Model):
@@ -40,7 +41,7 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Автор')
     text = models.TextField(verbose_name='Текст комментария')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
-    parent_comment = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT,
+    parent_comment = models.ForeignKey(to='self', null=True, blank=True, on_delete=models.PROTECT,
                                        related_name='replies', verbose_name='Родительский комментарий')
 
     def get_absolute_url(self):
@@ -70,12 +71,34 @@ class Post(models.Model):
     is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
 
     def get_absolute_url(self):
-        return reverse(viewname='post', kwargs={'post_slug': self.slug})
+        return reverse(viewname='post', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
         ordering = ['title']
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.PROTECT, verbose_name='Пользователь')
+    avatar = models.ImageField(upload_to='media/avatars', verbose_name='Аватар',  null=True, blank=True)
+    about_me = models.TextField(verbose_name='О себе', null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+    def get_user_posts(self):
+        return self.user.post_author.all()
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+        ordering = ['user']
