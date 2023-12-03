@@ -1,0 +1,6 @@
+{% for comment in post.comments.all %}
+    <div class="comment">
+        <p>{{ comment.text }}</p>
+        <p>Автор: {{ comment.author.username }}</p>
+    </div>
+{% endfor %}

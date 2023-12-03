@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from taggit.managers import TaggableManager
 
 
 class Category(models.Model):
@@ -20,20 +21,7 @@ class Category(models.Model):
         ordering = ['title']
 
 
-class Tag(models.Model):
-    title = models.CharField(max_length=128, verbose_name='Название')
-    slug = models.SlugField(max_length=128, unique=True, verbose_name='URL')
 
-    def get_absolute_url(self):
-        return reverse(viewname='tag', kwargs={'tag_slug': self.slug})
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-        ordering = ['title']
 
 
 class Comment(models.Model):
@@ -56,7 +44,16 @@ class Comment(models.Model):
         ordering = ['created_at']
 
 
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=Post.Status.PUBLISHED)
+
+
 class Post(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = 'DF', 'Draft'
+        PUBLISHED = 'PB', 'Published'
+
     title = models.CharField(max_length=128, verbose_name='Название')
     slug = models.SlugField(max_length=128, unique=True, verbose_name='URL')
     content = models.TextField(blank=True, verbose_name='Контент')
@@ -64,11 +61,14 @@ class Post(models.Model):
     author = models.ForeignKey(User, related_name='post_author', on_delete=models.PROTECT, verbose_name='Автор')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='posts', verbose_name='Категория')
-    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
+    tags = TaggableManager(verbose_name='Теги')
     comments = models.ManyToManyField(Comment, blank=True, related_name='post_comment')
     likes = models.PositiveIntegerField(default=0, verbose_name='Лайки')
     views = models.PositiveIntegerField(default=0, verbose_name='Просмотры')
-    is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
+    status = models.CharField(max_length=2, choices=Status.choices, default=Status.PUBLISHED, verbose_name='Статус')
+
+    objects = models.Manager()
+    published = PublishedManager()
 
     def get_absolute_url(self):
         return reverse(viewname='post', kwargs={'slug': self.slug})
@@ -89,7 +89,7 @@ class Post(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, verbose_name='Пользователь')
-    avatar = models.ImageField(upload_to='media/avatars', verbose_name='Аватар',  null=True, blank=True)
+    avatar = models.ImageField(upload_to='media/avatars', verbose_name='Аватар', null=True, blank=True)
     about_me = models.TextField(verbose_name='О себе', null=True, blank=True)
 
     def __str__(self):

@@ -1,6 +1,7 @@
 from django import template
+from taggit.models import Tag
 
-from ..models import Category, Tag
+from ..models import Category, Comment
 
 register = template.Library()
 
@@ -11,7 +12,6 @@ def show_categories(category_selected_slug=None):
     context = {
         'categories': categories,
     }
-
     if category_selected_slug is None:
         context['is_home_page'] = True
     else:
@@ -24,3 +24,9 @@ def show_categories(category_selected_slug=None):
 def show_tags():
     tags = Tag.objects.all()
     return {'tags': tags}
+
+
+# @register.inclusion_tag(filename='blog/list_comments.html')
+# def show_comments(post_slug):
+#     comments = Comment.objects.filter(post__slug=post_slug)
+#     return {'comments': comments}

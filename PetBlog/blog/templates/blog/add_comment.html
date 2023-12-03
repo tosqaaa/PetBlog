@@ -1,0 +1,6 @@
+<form hx-post="{% url 'add_comment' post.slug %}" hx-target="#comments-container" hx-swap="outerHTML">
+    {% csrf_token %}
+    <label for="id_text">Комментарий:</label>
+    <textarea id="id_text" name="text"></textarea>
+    <button type="submit">Добавить комментарий</button>
+</form>

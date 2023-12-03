@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile, Post
+from .models import Profile, Post, Comment
 
 
 # from .models import Profile
@@ -52,7 +52,7 @@ class ProfileForm(forms.ModelForm):
 class CreatePostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'category', 'tags', 'is_published']
+        fields = ['title', 'content', 'image', 'category', 'tags', 'status']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': CKEditorUploadingWidget(),
@@ -61,6 +61,28 @@ class CreatePostForm(forms.ModelForm):
 
 
 class MailingForm(forms.Form):
-    title = forms.CharField(label='Название', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    context = forms.CharField(label='Название', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    subject = forms.CharField(label='Название', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    content = forms.CharField(label='Текст', widget=forms.Textarea(attrs={'class': 'form-control'}))
 
+    class Meta:
+        fields = ['subject', 'content']
+
+
+class CreateCommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+        widgets = {
+            'text': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class SharePostForm(forms.Form):
+    sender_name = forms.CharField(max_length=128, label='Имя Отправителя',
+                                  widget=forms.TextInput(attrs={'class': 'form-control'}))
+    sender_email = forms.EmailField(max_length=128, label='Почта отправителя',
+                                    widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    recipient_email = forms.EmailField(max_length=128, label='Почта получателя',
+                                       widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    comment = forms.CharField(max_length=128, required=False, label='Дополнительные комментарии',
+                              widget=forms.TextInput(attrs={'class': 'form-control'}))

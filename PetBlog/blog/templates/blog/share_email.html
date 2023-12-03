@@ -1,0 +1,17 @@
+{%extends 'base.html'%}
+
+{%block TITLE%}
+{{title}} - {{block.super}}
+{%endblock%}
+
+{%block CONTENT%}
+<div class="col-lg-6">
+    <h1>Поделится постом</h1>
+    <form  method="post">
+        {%csrf_token%}
+        {{form.as_p}}
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+    <br>
+</div>
+{%endblock%}

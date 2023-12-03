@@ -18,6 +18,7 @@
 <h4 class="mb-3">O Себе:</h4>
 <p>{{profile.about_me|safe}}</p>
 <h4 class="mb-3">Посты</h4>
+{{user.post}}
 {%for post in user_posts%}
 <div class="list-group">
     <a href="{{post.get_absolute_url}}" class="list-group-item list-group-item-action">{{post.title}}</a>

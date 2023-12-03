@@ -2,9 +2,9 @@
 
 <div class="list-group">
     {%if is_home_page%}
-    <a href="{%url 'home'%}" class="list-group-item list-group-item-action active" aria-current="true">Все</a>
+    <a href="{%url 'home'%}" class="list-group-item list-group-item-action active" aria-current="true">Все посты</a>
     {%else%}
-    <a href="{%url 'home'%}" class="list-group-item list-group-item-action ">Все</a>
+    <a href="{%url 'home'%}" class="list-group-item list-group-item-action ">Все посты</a>
     {%endif%}
     {%for category in categories%}
     {%if category.slug == category_selected_slug%}

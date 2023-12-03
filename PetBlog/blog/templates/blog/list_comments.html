@@ -1,0 +1,15 @@
+<h4 class="mb-3">Комментарии</h4>
+{%for comment in post.comments.all%}
+<div class="card">
+    <h5 class="card-header">{{comment.author.username}}</h5>
+    <div class="card-body">
+        <p class="card-text">{{comment.text}}</p>
+        <a href="#" class="btn btn-primary">Ответить</a>
+    </div>
+    <div class="card-footer text-body-secondary">
+        Опубликовано: {{comment.created_at}}
+    </div>
+</div>
+{%empty%}
+<p>Нет комментариев</p>
+{%endfor%}
