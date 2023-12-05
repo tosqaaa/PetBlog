@@ -1,0 +1,35 @@
+{%extends 'base.html'%}
+
+{%block TITLE%}
+{{title}} - {{block.super}}
+{%endblock%}
+
+
+{%block CONTENT%}
+{% if query %}
+ <h1 class="mb-2"> Посты содержащие "{{ query }}"</h1>
+ <h3 class="mb-2">
+ {% with result_posts.count as posts_count %}
+Найдено {{ posts_count }} поста(ов)
+ {% endwith %}
+ </h3>
+ {% for post in result_posts %}
+<div class="list-group">
+ <a class="list-group-item list-group-item-action" href="{{ post.get_absolute_url }}">
+ {{ post.title }}
+ </a>
+</div>
+ {{ post.body|truncatewords:12 }}
+ {% empty %}
+ <h4 class="mt-2">Постов на найдено</h4>
+{%endfor%}
+ <p><a class="btn btn-outline-success mt-3" href="{% url 'search' %}">Искать заново</a></p>
+ {% else %}
+ <h1>Поиск поста</h1>
+ <form method="get">
+ {{ form.query }}
+  <button class="btn btn-outline-success" type="submit">Найти</button>
+ </form>
+ {% endif %}
+
+{%endblock%}

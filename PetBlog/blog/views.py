@@ -1,14 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
+from django.contrib.postgres.search import SearchVector
 from django.core.mail import send_mail
+from django.db.models import Count
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import DetailView, ListView
 from taggit.models import Tag
 
 from .forms import UserLoginForm, UserRegisterForm, ProfileForm, CreatePostForm, MailingForm, CreateCommentForm, \
-    SharePostForm
-from .models import Post, Comment, Category, Profile
+    SharePostForm, SearchForm
+from .models import Post, Category, Profile, Comment
 
 
 class PostHome(ListView):
@@ -21,7 +23,7 @@ class PostHome(ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Домашняя страница'
         context['tags'] = Post.tags.all()
-        context['posts_count'] = Post.objects.filter(is_published=True).count()
+        context['posts_count'] = Post.objects.filter(status=Post.Status.PUBLISHED).count()
         return context
 
     def get_queryset(self):
@@ -37,13 +39,23 @@ class PostDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Пост'
+        post = get_object_or_404(Post, status=Post.Status.PUBLISHED, slug=self.kwargs['slug'])
+
+        post_tag_list = post.tags.values_list('id', flat=True)
+
+        similar_posts = Post.published.filter(tags__in=post_tag_list).exclude(id=post.id)
+        similar_posts = similar_posts.annotate(same_tags=Count('tags')).order_by('-same_tags',
+                                                                                 '-created_at')[:4]
+
+        context['similar_posts'] = similar_posts
         return context
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset=queryset)
-        obj.views += 1
-        obj.save()
-        return obj
+
+def get_object(self, queryset=None):
+    obj = super().get_object(queryset=queryset)
+    obj.views += 1
+    obj.save()
+    return obj
 
 
 class CommentDetail(DetailView):
@@ -63,7 +75,7 @@ class PostCategory(ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = Category.objects.get(slug=self.kwargs['category_slug'])
         context['category_selected_slug'] = self.kwargs['category_slug']
-        context['posts_count'] = Post.objects.filter(is_published=True,
+        context['posts_count'] = Post.objects.filter(status=Post.Status.PUBLISHED,
                                                      category__slug=self.kwargs['category_slug']).count()
         return context
 
@@ -249,7 +261,7 @@ def share_post(request, slug):
             mail = send_mail(subject=subject, message=message,
                              from_email="totsamy.t@mail.ru",
                              recipient_list=[form.cleaned_data['recipient_email']], fail_silently=False)
-            if mail:
+            if mail:  
                 messages.success(request, message="Письмо отправлено успешно")
                 return redirect('home')
             else:
@@ -265,3 +277,25 @@ def share_post(request, slug):
     }
 
     return render(request, template_name='blog/share_email.html', context=context)
+
+
+def post_search(request):
+    form = SearchForm()
+    query = None
+    result_posts = []
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            result_posts = Post.published.annotate(search=SearchVector('title', 'content'), ).filter(search=query)
+        else:
+            messages.success(request, message="Ошибка поиска")
+            return redirect('search')
+
+    context = {
+        'form': form,
+        'query': query,
+        'result_posts': result_posts,
+        'title': 'Поиск поста'
+    }
+    return render(request, template_name='blog/search.html', context=context)

@@ -2,8 +2,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 
+from .feeds import LatestPostsFeed
 from .views import PostDetail, CommentDetail, PostCategory, PostHome, user_logout, user_login, user_register, \
-    edit_profile, UserProfile, create_post, send_mailing, add_comment, share_post, PostTag
+    edit_profile, UserProfile, create_post, send_mailing, add_comment, share_post, PostTag, post_search
 
 urlpatterns = [
     # path('', Home.as_view(), name='home')
@@ -21,6 +22,8 @@ urlpatterns = [
     path("mailing/", send_mailing, name='mailing'),
     path("add_comment/<str:slug>/", add_comment, name='add_comment'),
     path("share_post/<str:slug>/", share_post, name='share_post'),
+    path("feed/", LatestPostsFeed(), name='post_feed'),
+    path("search/", post_search, name='search')
 ]
 
 if settings.DEBUG:

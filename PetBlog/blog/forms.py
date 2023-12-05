@@ -86,3 +86,10 @@ class SharePostForm(forms.Form):
                                        widget=forms.EmailInput(attrs={'class': 'form-control'}))
     comment = forms.CharField(max_length=128, required=False, label='Дополнительные комментарии',
                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
+class SearchForm(forms.Form):
+    query = forms.CharField(label='Поиск', widget=forms.TextInput(attrs={'class': 'form-control mb-2',
+                                                                         'type': 'search',
+                                                                         'placeholder': 'Поиск',
+                                                                         'aria-label': 'Поиск'}))
